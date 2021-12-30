@@ -1,0 +1,35 @@
+{
+    "name": "urlshortener-backend",
+    "version": "1.0.0",
+    "description": "URL Shortener app",
+    "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "dev": "nodemon index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/gmkumaran87/urlshortener-backend.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/gmkumaran87/urlshortener-backend/issues"
+    },
+    "homepage": "https://github.com/gmkumaran87/urlshortener-backend#readme",
+    "dependencies": {
+        "@sendgrid/mail": "^7.6.0",
+        "bcryptjs": "^2.4.3",
+        "cors": "^2.8.5",
+        "crypto": "^1.0.1",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.2",
+        "helmet": "^4.6.0",
+        "mongodb": "^4.2.2",
+        "xss-clean": "^0.1.1"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.15"
+    }
+}
