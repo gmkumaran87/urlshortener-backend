@@ -5,6 +5,8 @@ const {
     randomStringGenerator,
 } = require("../utility/helper");
 
+const { sendGridMail } = require("../utility/sendMail");
+
 const registerUser = async(req, res) => {
     const { firstName, lastName, email, password } = req.body;
 
@@ -48,7 +50,7 @@ const forgotPassword = async(req, res) => {
             .collection("users")
             .updateOne({ _id: userId }, { $set: { randomStr: randomString } });
 
-        const resetLink = `${process.env.BASE_URL}/${userId}/${randomString}`;
+        const resetLink = `${process.env.FORGOT_PASSWORD_URL}/${userId}/${randomString}`;
         // Sending email
         const mailInfo = sendGridMail(req.body.email, resetLink);
 
@@ -60,9 +62,6 @@ const forgotPassword = async(req, res) => {
             msg: "User account does not exists, please enter valid email id",
         });
     }
-};
-const sendEmail = async(req, res) => {
-    res.send("Sending the email");
 };
 
 const emailValidation = async(req, res) => {
@@ -83,10 +82,32 @@ const emailValidation = async(req, res) => {
     }
 };
 
+const updatePassword = async(req, res) => {
+    const { confirmPassword, userId, randomStr } = req.body;
+
+    // Hashing the Password
+    const hashedPassword = await hashPassword(confirmPassword);
+
+    const db = await connectDB();
+    const userExists = await db
+        .collection("users")
+        .findOne({ _id: ObjectId(userId), randomStr: randomStr });
+
+    if (userExists) {
+        const updatedUser = await db
+            .collection("users")
+            .updateOne({ _id: ObjectId(userId) }, { $set: { password: hashedPassword, randomStr: "" } });
+
+        res.status(200).json({ msg: "Password updated successfully", updatedUser });
+    } else {
+        res.status(404).json({ msg: "Something went wrong, please try again" });
+    }
+};
+
 module.exports = {
     registerUser,
     forgotPassword,
-    sendEmail,
     emailValidation,
     loginUser,
+    updatePassword,
 };
