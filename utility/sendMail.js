@@ -1,6 +1,6 @@
 const sgMail = require("@sendgrid/mail");
 
-const sendGridMail = async(email, link) => {
+const sendGridMail = async(email, link, customMessage) => {
     try {
         sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -9,7 +9,7 @@ const sendGridMail = async(email, link) => {
             from: "gmkumaran87@gmail.com", // Change to your verified sender
             subject: "Sending with SendGrid for Password reset",
             text: link,
-            html: `<strong>Kindly click the link for resetting the Password,</strong>
+            html: `<strong>Kindly click the link for ${customMessage},</strong>
             <a href=${link}><button>Reset Password</button></a>`,
         };
 

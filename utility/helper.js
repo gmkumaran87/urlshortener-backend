@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const dbConnection = require("../db/connect");
 const { randomBytes } = require("crypto");
+const jwt = require("jsonwebtoken");
 
 const connectDB = async() => {
     const client = dbConnection();
@@ -15,4 +16,10 @@ const hashPassword = async(password) => {
 
 const randomStringGenerator = () => randomBytes(20).toString("hex");
 
-module.exports = { connectDB, hashPassword, randomStringGenerator };
+const jsonToken = (email, name) => {
+    const token = jwt.sign({ email: email, name: name },
+        randomStringGenerator(), { expiresIn: 24 }
+    );
+    return token;
+};
+module.exports = { connectDB, hashPassword, randomStringGenerator, jsonToken };

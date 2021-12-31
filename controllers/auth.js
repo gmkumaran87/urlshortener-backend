@@ -1,36 +1,59 @@
+const { AccountExistsError } = require("../errors");
+const { StatusCodes } = require("http-status-codes");
 const { ObjectId } = require("mongodb");
+const { sendGridMail } = require("../utility/sendMail");
 const {
     connectDB,
     hashPassword,
     randomStringGenerator,
+    jsonToken,
 } = require("../utility/helper");
-
-const { sendGridMail } = require("../utility/sendMail");
 
 const registerUser = async(req, res) => {
     const { firstName, lastName, email, password } = req.body;
 
-    // Hashing the Password
-    const hashedPassword = await hashPassword(password);
-
-    const userObj = { firstName, lastName, email, password: hashedPassword };
-
     // DB Connection and insertion
     const db = await connectDB();
-
     // Finding the User present in the DB
     const userExists = await db.collection("users").findOne({ email: email });
 
-    // If the User doesn't exists in the DB
-    if (!userExists) {
-        const user = await db.collection("users").insertOne(userObj);
-        res.status(200).json({ msg: "Registered the User, Please login", user });
-        return;
+    if (userExists) {
+        throw new AccountExistsError("Email already exists");
     }
 
-    res.status(400).json({
-        msg: "Email is already registered, please login or try with another account",
-    });
+    // Hashing the Password
+    const hashedPassword = await hashPassword(password);
+
+    // Creating Confirmation token
+    const confirmationToken = jsonToken(email, firstName);
+
+    console.log("token", confirmationToken);
+
+    const userObj = {
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        isActive: false,
+        confirmationCode: confirmationToken,
+    };
+
+    // Inserting into the DB with user details
+    const user = await db.collection("users").insertOne(userObj);
+
+    // Account Activation link
+    const activationLink = `${process.env.ACCOUNT_ACTIVATION_URL}/${confirmationToken}`;
+
+    // Sending email
+    const mailInfo = sendGridMail(
+        req.body.email,
+        activationLink,
+        "activating your account"
+    );
+
+    res
+        .status(StatusCodes.CREATED)
+        .json({ msg: "Registered the User, Please login", user });
 };
 
 const loginUser = async(req, res) => {
@@ -52,7 +75,11 @@ const forgotPassword = async(req, res) => {
 
         const resetLink = `${process.env.FORGOT_PASSWORD_URL}/${userId}/${randomString}`;
         // Sending email
-        const mailInfo = sendGridMail(req.body.email, resetLink);
+        const mailInfo = sendGridMail(
+            req.body.email,
+            resetLink,
+            "resetting the Password"
+        );
 
         res.status(200).json({
             msg: "Please check your email for the Password reset Link",
