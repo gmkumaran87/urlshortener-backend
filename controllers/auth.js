@@ -1,4 +1,8 @@
-const { AccountExistsError } = require("../errors");
+const {
+    AccountExistsError,
+    BadRequestError,
+    UnauthenticatedError,
+} = require("../errors");
 const { StatusCodes } = require("http-status-codes");
 const { ObjectId } = require("mongodb");
 const { sendGridMail } = require("../utility/sendMail");
@@ -7,6 +11,7 @@ const {
     hashPassword,
     randomStringGenerator,
     jsonToken,
+    comparePassword,
 } = require("../utility/helper");
 
 const registerUser = async(req, res) => {
@@ -25,7 +30,10 @@ const registerUser = async(req, res) => {
     const hashedPassword = await hashPassword(password);
 
     // Creating Confirmation token
-    const confirmationToken = jsonToken(email, firstName);
+    const confirmationToken = jsonToken(
+        email,
+        Math.floor(Math.random() * 100) + 1
+    );
 
     console.log("token", confirmationToken);
 
@@ -57,7 +65,30 @@ const registerUser = async(req, res) => {
 };
 
 const loginUser = async(req, res) => {
-    res.send("Logging the user");
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+        throw new BadRequestError("Please provide email and passowrd");
+    }
+    // DB Connection and insertion
+    const db = await connectDB();
+    const user = await db.collection("users").findOne({ email: req.body.email });
+
+    if (!user) {
+        throw new UnauthenticatedError("Invalid Credentials");
+    }
+
+    const isCorrect = comparePassword(password, user.password);
+
+    if (!isCorrect) {
+        throw new UnauthenticatedError("Invalid Credentials");
+    }
+
+    const token = jsonToken(email, user._id);
+
+    res
+        .status(StatusCodes.CREATED)
+        .json({ userName: user.firstName, userId: user._id, token });
 };
 const forgotPassword = async(req, res) => {
     // DB Connection and insertion
@@ -131,10 +162,34 @@ const updatePassword = async(req, res) => {
     }
 };
 
+const accountActivation = async(req, res) => {
+    const { confirmationCode } = req.params;
+
+    const db = await connectDB();
+    const userExists = await db.collection("users").findOne({
+        confirmationCode: confirmationCode,
+    });
+
+    if (userExists) {
+        await db
+            .collection("users")
+            .updateOne({ _id: userExists._id }, { $set: { isActive: true } });
+
+        res.status(StatusCodes.OK).json({
+            msg: "Account activation link validation is successfull",
+            userExists,
+        });
+    } else {
+        res
+            .status(StatusCodes.BAD_REQUEST)
+            .json({ msg: "Activation link is not valid" });
+    }
+};
 module.exports = {
     registerUser,
     forgotPassword,
     emailValidation,
     loginUser,
     updatePassword,
+    accountActivation,
 };

@@ -5,6 +5,7 @@ const {
     loginUser,
     emailValidation,
     updatePassword,
+    accountActivation,
 } = require("../controllers/auth");
 
 const router = express.Router();
@@ -14,5 +15,6 @@ router.route("/register").post(registerUser);
 router.route("/forgot-password").post(forgotPassword);
 router.route("/update-password").post(updatePassword);
 router.route("/validation/:userId/:randomStr").post(emailValidation);
+router.route("/confirm/:confirmationCode").get(accountActivation);
 
 module.exports = router;

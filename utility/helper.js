@@ -14,12 +14,22 @@ const hashPassword = async(password) => {
     return await bcrypt.hash(password, salt);
 };
 
+const comparePassword = async(enteredPassword, password) => {
+    const isCorrect = await bcrypt.compare(enteredPassword, password);
+    return isCorrect;
+};
 const randomStringGenerator = () => randomBytes(20).toString("hex");
 
-const jsonToken = (email, name) => {
-    const token = jwt.sign({ email: email, name: name },
+const jsonToken = (email, userId) => {
+    const token = jwt.sign({ email: email, id: userId },
         randomStringGenerator(), { expiresIn: 24 }
     );
     return token;
 };
-module.exports = { connectDB, hashPassword, randomStringGenerator, jsonToken };
+module.exports = {
+    connectDB,
+    hashPassword,
+    randomStringGenerator,
+    jsonToken,
+    comparePassword,
+};
