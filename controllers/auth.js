@@ -103,7 +103,7 @@ const forgotPassword = async(req, res) => {
     if (userExists) {
         // Ge
         const userId = userExists._id;
-        const randomString = randomStringGenerator();
+        const randomString = randomStringGenerator(20);
 
         const updatedStr = await db
             .collection("users")
