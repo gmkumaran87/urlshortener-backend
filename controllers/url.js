@@ -70,7 +70,7 @@ const createUrl = async(req, res) => {
             throw new BadRequestError("Invalid request URL");
         }
     }
-
+    req.body.shortUrl = shortUrl;
     console.log("Req body", req.body);
     const urlCreated = await db.collection("url").insertOne(req.body);
 
