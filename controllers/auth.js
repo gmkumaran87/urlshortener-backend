@@ -13,6 +13,7 @@ const {
     jsonToken,
     comparePassword,
 } = require("../utility/helper");
+const { compareSync } = require("bcryptjs");
 
 const registerUser = async(req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -78,17 +79,21 @@ const loginUser = async(req, res) => {
         throw new UnauthenticatedError("Invalid Credentials");
     }
 
-    const isCorrect = comparePassword(password, user.password);
-
+    const isCorrect = await comparePassword(password, user.password);
+    console.log(isCorrect);
     if (!isCorrect) {
         throw new UnauthenticatedError("Invalid Credentials");
     }
 
     const token = jsonToken(email, user._id);
 
-    res
-        .status(StatusCodes.CREATED)
-        .json({ userName: user.firstName, userId: user._id, token });
+    console.log("Token generated", token);
+    res.status(StatusCodes.CREATED).json({
+        msg: "User Logged in successfully...",
+        userName: user.firstName,
+        userId: user._id,
+        token,
+    });
 };
 const forgotPassword = async(req, res) => {
     // DB Connection and insertion
@@ -131,12 +136,12 @@ const emailValidation = async(req, res) => {
         .findOne({ _id: ObjectId(userId), randomStr: randomStr });
 
     if (userExists) {
-        res.status(200).json({
+        res.status(StatusCodes.OK).json({
             msg: "Password Reset link validation is successfull",
             userExists,
         });
     } else {
-        res.status(404).json({ msg: "Password reset link is not valid" });
+        throw new BadRequestError("Link is not valid, please check");
     }
 };
 
@@ -156,12 +161,13 @@ const updatePassword = async(req, res) => {
             .collection("users")
             .updateOne({ _id: ObjectId(userId) }, { $set: { password: hashedPassword, randomStr: "" } });
 
-        res.status(200).json({ msg: "Password updated successfully", updatedUser });
+        res
+            .status(StatusCodes.OK)
+            .json({ msg: "Password updated successfully", updatedUser });
     } else {
-        res.status(404).json({ msg: "Something went wrong, please try again" });
+        throw new UnauthenticatedError("Invalid Credentials");
     }
 };
-
 const accountActivation = async(req, res) => {
     const { confirmationCode } = req.params;
 

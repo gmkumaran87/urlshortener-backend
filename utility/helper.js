@@ -21,9 +21,7 @@ const comparePassword = async(enteredPassword, password) => {
 const randomStringGenerator = () => randomBytes(20).toString("hex");
 
 const jsonToken = (email, userId) => {
-    const token = jwt.sign({ email: email, id: userId },
-        randomStringGenerator(), { expiresIn: 24 }
-    );
+    const token = jwt.sign({ email: email, id: userId }, process.env.JWT_SECRET);
     return token;
 };
 module.exports = {
