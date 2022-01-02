@@ -1,9 +1,12 @@
-const bcrypt = require("bcryptjs");
-const dbConnection = require("../db/connect");
-const { randomBytes } = require("crypto");
-const jwt = require("jsonwebtoken");
-const dns = require("dns");
-const { BadRequestError } = require("../errors");
+// import { genSalt, hash, compare } from "bcryptjs";
+import bc from "bcryptjs";
+import dbConnection from "../db/connect.js";
+import { randomBytes } from "crypto";
+import Jwt from "jsonwebtoken";
+import { lookup } from "dns";
+
+const { genSalt, hash, compare } = bc;
+const { sign } = Jwt;
 
 const connectDB = async() => {
     const client = dbConnection();
@@ -12,24 +15,24 @@ const connectDB = async() => {
 };
 
 const hashPassword = async(password) => {
-    const salt = await bcrypt.genSalt(10);
-    return await bcrypt.hash(password, salt);
+    const salt = await genSalt(10);
+    return await hash(password, salt);
 };
 
 const comparePassword = async(enteredPassword, password) => {
-    const isCorrect = await bcrypt.compare(enteredPassword, password);
+    const isCorrect = await compare(enteredPassword, password);
     return isCorrect;
 };
 const randomStringGenerator = (length) => randomBytes(length).toString("hex");
 
 const jsonToken = (email, userId) => {
-    const token = jwt.sign({ email: email, id: userId }, process.env.JWT_SECRET);
+    const token = sign({ email: email, id: userId }, process.env.JWT_SECRET);
     return token;
 };
 
 const verifyUrl = (host) => {
     return new Promise((resolve, reject) => {
-        dns.lookup(host, (err, address, family) => {
+        lookup(host, (err, address, family) => {
             if (err) {
                 reject("Invalid URL");
             }
@@ -38,7 +41,7 @@ const verifyUrl = (host) => {
         });
     });
 };
-module.exports = {
+export {
     connectDB,
     hashPassword,
     randomStringGenerator,

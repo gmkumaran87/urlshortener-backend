@@ -1,19 +1,19 @@
-const {
+import {
     AccountExistsError,
     BadRequestError,
     UnauthenticatedError,
-} = require("../errors");
-const { StatusCodes } = require("http-status-codes");
-const { ObjectId } = require("mongodb");
-const { sendGridMail } = require("../utility/sendMail");
-const {
+} from "../errors/index.js";
+import { StatusCodes } from "http-status-codes";
+import { ObjectId } from "mongodb";
+import sendGridMail from "../utility/sendMail.js";
+import {
     connectDB,
     hashPassword,
     randomStringGenerator,
     jsonToken,
     comparePassword,
-} = require("../utility/helper");
-const { compareSync } = require("bcryptjs");
+} from "../utility/helper.js";
+// import { compareSync } from "bcryptjs";
 
 const registerUser = async(req, res) => {
     const { firstName, lastName, email, password } = req.body;
@@ -191,7 +191,7 @@ const accountActivation = async(req, res) => {
             .json({ msg: "Activation link is not valid" });
     }
 };
-module.exports = {
+export {
     registerUser,
     forgotPassword,
     emailValidation,

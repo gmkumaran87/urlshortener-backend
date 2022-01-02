@@ -1,7 +1,7 @@
-const express = require("express");
-const router = express.Router();
-const { getAllUrls, createUrl } = require("../controllers/url");
+import { Router } from "express";
+const urlRouter = Router();
+import { getAllUrls, createUrl } from "../controllers/url.js";
 
-router.route("/").get(getAllUrls).post(createUrl);
+urlRouter.route("/").get(getAllUrls).post(createUrl);
 
-module.exports = router;
+export default urlRouter;

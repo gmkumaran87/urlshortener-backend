@@ -1,5 +1,7 @@
-const jwt = require("jsonwebtoken");
-const { UnauthenticatedError } = require("../errors");
+import Jwt from "jsonwebtoken";
+import { UnauthenticatedError } from "../errors/index.js";
+
+const { verify } = Jwt;
 
 const authentication = async(req, res, next) => {
     const header = req.headers.authorization;
@@ -11,7 +13,7 @@ const authentication = async(req, res, next) => {
     const token = header.split(" ")[1];
 
     try {
-        const tokenValid = jwt.verify(token, process.env.JWT_SECRET);
+        const tokenValid = verify(token, process.env.JWT_SECRET);
         console.log("Token processed", tokenValid);
         req.user = { userId: tokenValid.id, email: tokenValid.email };
         next();
@@ -20,4 +22,4 @@ const authentication = async(req, res, next) => {
     }
 };
 
-module.exports = authentication;
+export default authentication;

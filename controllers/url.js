@@ -1,18 +1,17 @@
-const {
+import {
     AccountExistsError,
     BadRequestError,
     UnauthenticatedError,
-} = require("../errors");
-const { StatusCodes } = require("http-status-codes");
-const { ObjectId } = require("mongodb");
-const {
+} from "../errors/index.js";
+import { StatusCodes } from "http-status-codes";
+import { ObjectId } from "mongodb";
+import {
     connectDB,
     jsonToken,
     randomStringGenerator,
     verifyUrl,
-} = require("../utility/helper");
-const Url = require("url-parse");
-const dns = require("dns");
+} from "../utility/helper.js";
+import Url from "url-parse";
 
 const getAllUrls = async(req, res) => {
     res.send("All the Url");
@@ -24,7 +23,6 @@ const createUrl = async(req, res) => {
 
     const { originalUrl } = req.body;
 
-    console.log(originalUrl, req.body);
     // Attaching the UserId to the req.body for inserting in the DB
     req.body.createdBy = req.user.userId;
     req.body.createdAt = new Date();
@@ -50,14 +48,9 @@ const createUrl = async(req, res) => {
         if (!shortUrlFromDb) {
             isExists = true;
         }
-        console.log("ShortURL", shortUrl);
     }
 
-    console.log("Short string", shortUrl);
-
     const urlParse = new Url(originalUrl);
-
-    console.log("URL Parse", urlParse);
 
     //Checking the entered Url is valid
     if (urlParse.host === null) {
@@ -77,4 +70,4 @@ const createUrl = async(req, res) => {
     res.status(StatusCodes.CREATED).json({ msg: "Url Created", urlCreated });
 };
 
-module.exports = { getAllUrls, createUrl };
+export { getAllUrls, createUrl };

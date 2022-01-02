@@ -1,20 +1,20 @@
-const express = require("express");
-const {
+import { Router } from "express";
+import {
     registerUser,
     forgotPassword,
     loginUser,
     emailValidation,
     updatePassword,
     accountActivation,
-} = require("../controllers/auth");
+} from "../controllers/auth.js";
 
-const router = express.Router();
+const authRouter = Router();
 
-router.route("/login").post(loginUser);
-router.route("/register").post(registerUser);
-router.route("/forgot-password").post(forgotPassword);
-router.route("/update-password").post(updatePassword);
-router.route("/validation/:userId/:randomStr").post(emailValidation);
-router.route("/confirm/:confirmationCode").get(accountActivation);
+authRouter.route("/login").post(loginUser);
+authRouter.route("/register").post(registerUser);
+authRouter.route("/forgot-password").post(forgotPassword);
+authRouter.route("/update-password").post(updatePassword);
+authRouter.route("/validation/:userId/:randomStr").post(emailValidation);
+authRouter.route("/confirm/:confirmationCode").get(accountActivation);
 
-module.exports = router;
+export default authRouter;

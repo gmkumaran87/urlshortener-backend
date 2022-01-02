@@ -1,4 +1,4 @@
-const { MongoClient } = require("mongodb");
+import { MongoClient } from "mongodb";
 
 const dbConnection = async() => {
     try {
@@ -11,4 +11,4 @@ const dbConnection = async() => {
     }
 };
 
-module.exports = dbConnection;
+export default dbConnection;
