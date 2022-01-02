@@ -14,7 +14,7 @@ const authentication = async(req, res, next) => {
 
     try {
         const tokenValid = verify(token, process.env.JWT_SECRET);
-        console.log("Token processed", tokenValid);
+        // console.log("Token processed", tokenValid);
         req.user = { userId: tokenValid.id, email: tokenValid.email };
         next();
     } catch (error) {
