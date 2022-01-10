@@ -26,7 +26,9 @@ const comparePassword = async(enteredPassword, password) => {
 const randomStringGenerator = (length) => randomBytes(length).toString("hex");
 
 const jsonToken = (email, userId) => {
-    const token = sign({ email: email, id: userId }, process.env.JWT_SECRET);
+    const token = sign({ email: email, id: userId }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+    });
     return token;
 };
 
@@ -41,6 +43,32 @@ const verifyUrl = (host) => {
         });
     });
 };
+
+const currentCount = (arr, dayMonth) => {
+    let currentMonth = 0;
+    let currentDay = 0;
+
+    currentMonth = new Date().getMonth() + 1;
+    currentDay = new Date().getDate();
+
+    const currentMonthUrl = arr.filter((el) => {
+        const createdMonthUrl = new Date(el.createdAt).getMonth() + 1;
+
+        if (currentMonth === createdMonthUrl) {
+            return true;
+        }
+        return false;
+    });
+
+    const currentDateUrl = arr.filter(
+        (el) => currentDay === new Date(el.createdAt.getDate())
+    );
+
+    return {
+        monthUrlCount: currentMonthUrl.length,
+        dayUrlCount: currentDateUrl.length,
+    };
+};
 export {
     connectDB,
     hashPassword,
@@ -48,4 +76,5 @@ export {
     jsonToken,
     comparePassword,
     verifyUrl,
+    currentCount,
 };

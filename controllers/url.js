@@ -10,11 +10,32 @@ import {
     jsonToken,
     randomStringGenerator,
     verifyUrl,
+    currentCount,
 } from "../utility/helper.js";
 import Url from "url-parse";
 
 const getAllUrls = async(req, res) => {
-    res.send("All the Url");
+    console.log(req.body, req.user);
+
+    const { userId, email } = req.user;
+
+    console.log("Userid", userId);
+
+    // Connecting to the DB
+    const db = await connectDB();
+
+    const userUrl = await db
+        .collection("url")
+        .find({ createdBy: userId })
+        .toArray();
+
+    const countUrl = currentCount(userUrl);
+    console.log("Current Month Url", countUrl);
+    res.status(StatusCodes.OK).json({
+        msg: "Successfully get the Urls",
+        userUrl,
+        countUrl,
+    });
 };
 
 const createUrl = async(req, res) => {
@@ -70,4 +91,26 @@ const createUrl = async(req, res) => {
     res.status(StatusCodes.CREATED).json({ msg: "Url Created", urlCreated });
 };
 
-export { getAllUrls, createUrl };
+const getSite = async(req, res) => {
+    const { id } = req.params;
+
+    console.log("Url entered", id, req.params);
+
+    // Connecting the DB
+    const db = await connectDB();
+
+    const url = await db.collection("url").findOne({ shortUrl: id });
+
+    console.log(url);
+
+    if (url) {
+        const updatedHits = await db
+            .collection("url")
+            .updateOne({ _id: url._id }, { $set: { clicks: url.clicks + 1 } });
+        res.redirect(url.originalUrl);
+        // res.status(StatusCodes.OK).json({ msg: "Url correct" });
+    } else {
+        throw new BadRequestError("ENtered URL is wrong..");
+    }
+};
+export { getAllUrls, createUrl, getSite };

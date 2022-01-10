@@ -14,6 +14,7 @@ const app = express();
 // Routers
 import authrouter from "./routers/auth.js";
 import urlRouter from "./routers/url.js";
+import tinyUrl from "./routers/tinyUrl.js";
 
 // Error handler
 import errorHandlerMiddleware from "./middleware/error-handler.js";
@@ -25,6 +26,7 @@ app.use(cors());
 app.use(xss());
 
 app.use("/api/v1/auth", authrouter);
+app.use("/api/v1/shorturl", tinyUrl);
 app.use("/api/v1/url", authentication, urlRouter);
 
 app.get("/", (req, res) => {
